@@ -192,6 +192,61 @@ namespace PlayingCards
         }
 
         /// <summary>
+        /// 役を表示する
+        /// </summary>
+        /// <param name="role">役</param>
+        public void RoleDisplay()
+        {
+            switch (MyCharacter.Role)
+            {
+                case Role.RoyalFlush:
+                    ActionMessage.Text = "Rストレート\nフラッシュ";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.StraightFlush:
+                    ActionMessage.Text = "ストレート\nフラッシュ";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.FourOfKind:
+                    ActionMessage.Text = "フォーカード";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.FullHouse:
+                    ActionMessage.Text = "フルハウス";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.Flush:
+                    ActionMessage.Text = "フラッシュ";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.Straight:
+                    ActionMessage.Text = "ストレート";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.ThreeOfKind:
+                    ActionMessage.Text = "スリーカード";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.TwoPair:
+                    ActionMessage.Text = "ツーペア";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.Pair:
+                    ActionMessage.Text = "ワンペア";
+                    PokerForm.Instance.Refresh();
+                    return;
+                case Role.HighCard:
+                    ActionMessage.Text = "ハイカード";
+                    PokerForm.Instance.Refresh();
+                    return;
+                default:
+                    ActionMessage.Text = "";
+                    PokerForm.Instance.Refresh();
+                    return;
+            }
+        }
+
+        /// <summary>
         /// 全て表示する
         /// </summary>
         public void AreaDisplay()

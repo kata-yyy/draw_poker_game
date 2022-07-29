@@ -17,7 +17,7 @@ namespace PlayingCards
         /// <summary>
         /// ジョーカー抜き５２枚のカードリスト
         /// </summary>
-        static Card[] originalDeck = new Card[]
+        static Card[] originalCards = new Card[]
         {
             new Card(Suit.Club, 1), new Card(Suit.Club, 2), new Card(Suit.Club, 3),
             new Card(Suit.Club, 4), new Card(Suit.Club, 5), new Card(Suit.Club, 6),
@@ -63,7 +63,7 @@ namespace PlayingCards
 
             for(int i = 0; i < 52; i++)
             {
-                Deck.Add(originalDeck[i]);
+                Deck.Add(originalCards[i]);
             }
 
             for (int i = 0; i < jokerCount; i++)
