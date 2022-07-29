@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{84166ABA-58E6-4B2C-9C87-1B18FA912742}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Poker</RootNamespace>
+    <AssemblyName>Poker</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Character\CharacterCreater.cs" />
+    <Compile Include="Card.cs" />
+    <Compile Include="Enum\Action.cs" />
+    <Compile Include="Enum\Suit.cs" />
+    <Compile Include="Dealer.cs" />
+    <Compile Include="Enum\Role.cs" />
+    <Compile Include="Character\NonPlayerCharacter.cs" />
+    <Compile Include="Character\PlayerCharacter.cs" />
+    <Compile Include="Character\Character.cs" />
+    <Compile Include="Enum\Status.cs" />
+    <Compile Include="Area\Controller.cs" />
+    <Compile Include="Area\Area1.cs" />
+    <Compile Include="Area\Area2.cs" />
+    <Compile Include="Area\Area3.cs" />
+    <Compile Include="Area\Area4.cs" />
+    <Compile Include="Image.cs" />
+    <Compile Include="Judge.cs" />
+    <Compile Include="PokerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PokerForm.Designer.cs">
+      <DependentUpon>PokerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MenuForm.Designer.cs">
+      <DependentUpon>MenuForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Area\Area.cs" />
+    <Compile Include="PokerMain.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="PokerForm.resx">
+      <DependentUpon>PokerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuForm.resx">
+      <DependentUpon>MenuForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_back.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_02.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_03.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_04.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_05.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_06.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_07.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_08.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_09.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_11.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_12.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_club_13.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_02.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_03.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_04.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_05.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_06.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_07.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_08.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_09.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_11.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_12.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_diamond_13.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_02.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_03.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_04.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_05.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_06.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_07.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_08.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_09.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_11.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_12.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_heart_13.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_joker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_01.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_02.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_03.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_04.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_05.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_06.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_07.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_08.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_09.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_11.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_12.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\card_spade_13.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
