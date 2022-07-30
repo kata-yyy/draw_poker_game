@@ -94,42 +94,33 @@ namespace PlayingCards
         }
 
         /// <summary>
-        /// 手札から役を決定する
-        /// </summary>
-        /// <param name="hand">手札</param>
-        /// <returns>役</returns>
-        public static Role GetRole(Card[] hand)
-        {
-            return Role.Flush;
-        }
-
-        /// <summary>
-        /// 勝者（一番強い役を作ったプレイヤー）を決める
-        /// </summary>
-        /// <param name="characterList">フォールドしていない参加プレイヤー</param>
-        /// <returns>勝者</returns>
-        public static Character WinCharacter(Character[] characterList)
-        {
-            return new PlayerCharacter("a");
-        }
-
-        /// <summary>
         /// 場のチップを勝者へ渡す
         /// </summary>
         /// <param name="winner">勝者</param>
         /// <param name="characterList">全参加プレイヤー</param>
-        public static void ChipMove(Character winner, Character[] characterList)
+        public static void ChipMove(Character winner, List<Character> characterList)
         {
+            foreach (var character in characterList)
+            {
+                winner.HoldChip += character.BetChip;
+                character.BetChip = 0;
+                character.MyArea.BetChipDisplay();
+            }
 
+            winner.MyArea.HoldChipDisplay();
         }
 
         /// <summary>
         /// 場のチップを全て回収する
         /// </summary>
 
-        public static void ChipDelete()
+        public static void ChipClear(List<Character> characterList)
         {
-
+            foreach (var character in characterList)
+            {
+                character.BetChip = 0;
+                character.MyArea.BetChipDisplay(character.BetChip);
+            }
         }
     }
 }

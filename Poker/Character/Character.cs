@@ -32,11 +32,7 @@ namespace PlayingCards
         /// <summary>
         /// できた役
         /// </summary>
-        public Role Role { get; set; }
-        /// <summary>
-        /// 前のキャラクター
-        /// </summary>
-        public Character PrevCharacter { get; set; }
+        public Role MyRole { get; set; }
         /// <summary>
         /// 次のキャラクター
         /// </summary>
@@ -60,7 +56,7 @@ namespace PlayingCards
             HoldChip = PokerMain.startChip;
             BetChip = 0;
             IsChangeHand = new bool[5] { false, false, false, false, false };
-            MyStatus = Status.Normal;
+            MyStatus = Status.Default;
         }
 
         /// <summary>
@@ -69,9 +65,9 @@ namespace PlayingCards
         public void EntryChip()
         {
             BetChip += PokerMain.entryChip;
-            MyArea.BetChipDisplay(BetChip);
+            MyArea.BetChipDisplay();
             HoldChip -= PokerMain.entryChip;
-            MyArea.HoldChipDisplay(HoldChip);
+            MyArea.HoldChipDisplay();
         }
 
         /// <summary>
@@ -80,7 +76,9 @@ namespace PlayingCards
         public void Check()
         {
             MyArea.ActionMessageDisplay(Action.Check);
-            PokerMain.checkCount++;
+
+            MyStatus = Status.Check;
+
             PokerMain.TurnEnd(this);
         }
 
@@ -92,10 +90,13 @@ namespace PlayingCards
         {
             MyArea.ActionMessageDisplay(Action.Bet, betChip);
             BetChip += betChip;
-            MyArea.BetChipDisplay(BetChip);
+            MyArea.BetChipDisplay();
             HoldChip -= betChip;
-            MyArea.HoldChipDisplay(HoldChip);
-            PokerMain.betFlag = true;
+            MyArea.HoldChipDisplay();
+
+            PokerMain.callChip = BetChip;
+            MyStatus = Status.Raise;
+
             PokerMain.TurnEnd(this);
         }
 
@@ -106,21 +107,23 @@ namespace PlayingCards
         {
             MyArea.ActionMessageDisplay(Action.Call);
 
-            // 前のプレイヤーがベットしているチップ数が、自身の全チップ数より多い場合、全額をベットする
-            if (PrevCharacter.BetChip > BetChip + HoldChip)
+            // コールに必要なチップ数が自身の全チップ数より多い場合、全額をベットする
+            if (PokerMain.callChip > BetChip + HoldChip)
             {
                 BetChip += HoldChip;
-                MyArea.BetChipDisplay(BetChip);
+                MyArea.BetChipDisplay();
                 HoldChip = 0;
-                MyArea.HoldChipDisplay(HoldChip);
+                MyArea.HoldChipDisplay();
             }
             else
             {
-                HoldChip -= PrevCharacter.BetChip - BetChip;
-                MyArea.HoldChipDisplay(HoldChip);
-                BetChip = PrevCharacter.BetChip;
-                MyArea.BetChipDisplay(BetChip);
+                HoldChip -= PokerMain.callChip - BetChip;
+                MyArea.HoldChipDisplay();
+                BetChip = PokerMain.callChip;
+                MyArea.BetChipDisplay();
             }
+
+            MyStatus = Status.Call;
 
             PokerMain.TurnEnd(this);
         }
@@ -132,12 +135,14 @@ namespace PlayingCards
         public void Raise(int raiseChip)
         {
             MyArea.ActionMessageDisplay(Action.Raise, raiseChip);
+            HoldChip -= PokerMain.callChip - BetChip + raiseChip;
+            MyArea.HoldChipDisplay();
+            BetChip = PokerMain.callChip + raiseChip;
+            MyArea.BetChipDisplay();
 
-            HoldChip -= PrevCharacter.BetChip - BetChip + raiseChip;
-            MyArea.HoldChipDisplay(HoldChip);
-            BetChip = PrevCharacter.BetChip + raiseChip;
-            MyArea.BetChipDisplay(BetChip);
-            PokerMain.raiseCharacter = this;
+            PokerMain.callChip = BetChip;
+            MyStatus = Status.Raise;
+
             PokerMain.TurnEnd(this);
         }
 
@@ -147,11 +152,10 @@ namespace PlayingCards
         public void Fold()
         {
             MyArea.ActionMessageDisplay(Action.Fold);
-            MyStatus = Status.Fold;
-            PrevCharacter.NextCharacter = NextCharacter;
-            NextCharacter.PrevCharacter = PrevCharacter;
             MyArea.HandFrontDisplay();
-            PokerMain.entryCharacter--;
+
+            MyStatus = Status.Fold;
+
             PokerMain.TurnEnd(this);
         }
 
@@ -169,7 +173,7 @@ namespace PlayingCards
                     changeHandCount++;
                 }
             }
-            MyArea.ActionMessageDisplay(Action.CardChange, changeHandCount);
+            MyArea.ChangeMessageDisplay(changeHandCount);
 
             // カードの破棄
             for (int i = 0; i < Hand.Length; i++)
@@ -193,6 +197,8 @@ namespace PlayingCards
                 }
                 IsChangeHand[i] = false;
             }
+
+            MyStatus = Status.ChangeHand;
 
             PokerMain.ChangeHandEnd(this);
         }

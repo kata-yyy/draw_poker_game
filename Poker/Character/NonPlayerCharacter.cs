@@ -41,6 +41,8 @@ namespace PlayingCards
             IsChangeHand[1] = true;
             IsChangeHand[2] = true;
             IsChangeHand[3] = true;
+
+            ChangeHand();
         }
 
         /// <summary>

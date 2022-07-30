@@ -419,7 +419,7 @@ namespace PlayingCards
         {
             int raiseChip = int.Parse(BetChipBox.Text);
 
-            if (MyPlayer.PrevCharacter.BetChip + raiseChip > MyPlayer.HoldChip)
+            if (PokerMain.callChip + raiseChip > MyPlayer.HoldChip)
             {
                 MessageBox.Show("チップが足りません");
             }

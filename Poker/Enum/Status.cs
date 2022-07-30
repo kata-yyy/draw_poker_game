@@ -8,8 +8,12 @@ namespace PlayingCards
 {
     enum Status
     {
-        Normal,
+        Default,
+        Check,
+        Call,
+        Raise,
         Fold,
+        ChangeHand,
         GameOver
     }
 }

@@ -12,26 +12,22 @@ namespace PlayingCards
     {
         static Random random = new Random();
 
+        // 初期値
         public static int startChip = 100;
         public static int minBetChip = 1;
         public static int maxBetChip = 5;
         public static int entryChip = 1;
 
         public static int maxCharacter = 4;
-        public static int entryCharacter = 4;
-        public static int aliveCharacter = 4;
         public static int maxRound = 1;
-        public static int roundCount = 1;
-        public static int changeHandCount = 0;
-        public static int gameoverCount = 0;
-        public static int checkCount = 0;
-        public static bool betFlag = false;
-        public static bool changeHandFlag = false;
 
+        public static int roundCount = 0;
+        public static bool isAfterBet = false;
+        public static bool isAfterChange = false;
+
+        public static int callChip = 0;
         public static List<Character> characterList = new List<Character>();
         public static Character startCharacter;
-        public static Character raiseCharacter;
-        public static Character winner;
 
         /// <summary>
         /// 新しくポーカーを開始する
@@ -47,11 +43,11 @@ namespace PlayingCards
                 character.MyArea.AreaDisplay();
             }
 
+            // 最初にアクションを起こすキャラクターを設定
             startCharacter = characterList[0];
 
-            // フラグ、カウンタを初期化
-            gameoverCount = 0;
-            roundCount = 1;
+            // ラウンド数を初期化
+            roundCount = 0;
 
             // 新しいラウンドを開始する
             RoundStart();
@@ -62,7 +58,8 @@ namespace PlayingCards
         /// </summary>
         public static void GameEnd()
         {
-
+            // 順位を表示
+            RankingDisplay();
         }
 
         /// <summary>
@@ -70,35 +67,25 @@ namespace PlayingCards
         /// </summary>
         public static void RoundStart()
         {
-            // フラグ、カウンタを初期化
-            betFlag = false;
-            changeHandFlag = false;
-            checkCount = 0;
-            changeHandCount = 0;
-            entryCharacter = aliveCharacter;
+            // フラグを初期化
+            isAfterBet = false;
+            isAfterChange = false;
+
+            // ラウンド数をカウントアップ
+            roundCount++;
 
             // 山札を作る
             Dealer.CreateDeck(0);
 
-            // カードを配る
-            for (int i = 0; i < 5; i++)
-            {
-                Thread.Sleep(300);
-                foreach (var character in characterList)
-                {
-                    character.Hand[i] = Dealer.DealCard();
-                    character.HandDisplay(i);
-                }
-            }
+            // 手札を配る
+            CreateHand();
 
             // 参加費を払う
+            
             foreach (var character in characterList)
             {
                 character.EntryChip();
             }
-
-            // 順番を決める
-            TurnSet();
 
             // キャラクター毎のアクションを開始する
             TurnStart(startCharacter);
@@ -109,9 +96,15 @@ namespace PlayingCards
         /// </summary>
         public static void RoundEnd()
         {
-            if (gameoverCount >= maxCharacter - 1)
+            // 手札をを全て非表示にする
+            HandClear();
+
+            // ゲームオーバーになったキャラを判定する
+            GameOverCheck();
+
+            // 参加可能なキャラクターが1人以下ならゲーム終了へ
+            if (IsAllGameOver())
             {
-                // 参加可能なキャラクターが1人以下ならゲーム終了へ
                 GameEnd();
                 return;
             }
@@ -124,7 +117,6 @@ namespace PlayingCards
             else
             {
                 // まだラウンドが残っているなら次のラウンドへ
-                roundCount++;
                 RoundStart();
             }
         }
@@ -135,9 +127,10 @@ namespace PlayingCards
         /// <param name="nowCharacter"></param>
         public static void TurnStart(Character nowCharacter)
         {
-            if (nowCharacter.MyStatus == Status.Normal)
+            // フォールド済、ゲームオーバーでないならアクションを選択
+            if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
             {
-                if (betFlag)
+                if (isAfterBet)
                 {
                     // ベット前のアクション選択
                     nowCharacter.ActionSelectAfterBet();
@@ -161,10 +154,17 @@ namespace PlayingCards
         /// <param name="nowCharacter"></param>
         public static void TurnEnd(Character nowCharacter)
         {
-            // 全員がチェックを選択した場合
-            if (checkCount == entryCharacter)
+            // ベット、又はレイズが行われた場合、他のステータスをデフォルトに戻す
+            if (nowCharacter.MyStatus == Status.Raise)
             {
-                if (changeHandFlag)
+                isAfterBet = true;
+                RaisedStatusReset(nowCharacter);
+            }
+
+            // 全員がチェックを選択した場合
+            if (IsAllCheck())
+            {
+                if (isAfterChange)
                 {
                     // カード交換済なら勝負する
                     BattleStart();
@@ -172,16 +172,16 @@ namespace PlayingCards
                 else
                 {
                     // カード交換前なら場のチップを回収してラウンド終了
-                    Dealer.ChipDelete();
+                    Dealer.ChipClear(characterList);
                     RoundEnd();
                 }
                 return;
             }
 
             // レイズしないまま１週した場合
-            if (raiseCharacter == nowCharacter.NextCharacter)
+            if (IsAllCall())
             {
-                if (changeHandFlag)
+                if (isAfterChange)
                 {
                     // カード交換済なら勝負する
                     BattleStart();
@@ -195,11 +195,11 @@ namespace PlayingCards
             }
 
             // １人を除いて全員がフォールドした場合
-            if (entryCharacter <= 1)
+            if (IsAllFold())
             {
                 // 残った一人を勝者とする
-                winner = nowCharacter.NextCharacter;
-                BattleEnd();
+                Character winner = NonFoldCharacter();
+                BattleEnd(winner);
                 return;
             }
 
@@ -213,9 +213,9 @@ namespace PlayingCards
         /// <param name="nowCharacter"></param>
         public static void ChangeHandStart(Character nowCharacter)
         {
-            if (nowCharacter.MyStatus == Status.Normal)
+            // フォールド済、ゲームオーバーでないならカード交換を行う
+            if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
             {
-                // ラウンドに参加中ならカード交換を行う
                 nowCharacter.ChangeHandSelect();
             }
             else
@@ -231,14 +231,11 @@ namespace PlayingCards
         /// <param name="nowCharacter"></param>
         public static void ChangeHandEnd(Character nowCharacter)
         {
-            changeHandCount++;
-
-            if (changeHandCount >= entryCharacter)
+            if (IsAllChanged())
             {
                 // 全員がカード交換したら、アクション選択へ移る
-                betFlag = false;
-                changeHandFlag = true;
-                checkCount = 0;
+                isAfterBet = false;
+                isAfterChange = true;
                 TurnStart(startCharacter);
             }
             else
@@ -248,29 +245,296 @@ namespace PlayingCards
             }
         }
 
+        /// <summary>
+        /// 勝負を開始する
+        /// </summary>
         public static void BattleStart()
         {
-            MessageBox.Show("勝負開始");
-        }
+            // フォールド、ゲームオーバーでないキャラクターのリストを作成
+            List<Character> aliveCharacterList = GetAliveCharacterList();
 
-        public static void BattleEnd()
-        {
-            MessageBox.Show("勝負終了");
+            // 役を確定する
+            foreach (var character in aliveCharacterList)
+            {
+                character.MyRole = Judge.GetRole(character.Hand);
+                character.MyArea.HandFrontDisplay();
+                character.MyArea.RoleDisplay();
+            }
+
+            // 勝者を決定する
+            Character winner = Judge.WinCharacter(aliveCharacterList);
+
+            // 勝負終了後の処理へ
+            BattleEnd(winner);
         }
 
         /// <summary>
-        /// 順番を決める
+        /// 勝負終了後の処理
         /// </summary>
-        public static void TurnSet()
+        /// <param name="winner"></param>
+        public static void BattleEnd(Character winner)
         {
-            characterList[0].PrevCharacter = characterList[3];
-            characterList[0].NextCharacter = characterList[1];
-            characterList[1].PrevCharacter = characterList[0];
-            characterList[1].NextCharacter = characterList[2];
-            characterList[2].PrevCharacter = characterList[1];
-            characterList[2].NextCharacter = characterList[3];
-            characterList[3].PrevCharacter = characterList[2];
-            characterList[3].NextCharacter = characterList[0];
+            // 場のチップを勝者へ移動する
+            Dealer.ChipMove(winner, characterList);
+
+            // ラウンド終了へ
+            RoundEnd();
+        }
+
+        /// <summary>
+        /// 全員がベットせずにチェックしたかを判定する
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAllCheck()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.Check && character.MyStatus != Status.Fold &&
+                    character.MyStatus != Status.GameOver)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 誰かがレイズ後、残りの参加者がレイズせずにコール（又はフォールド）したかを判定する
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAllCall()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.Call && character.MyStatus != Status.Raise &&
+                    character.MyStatus != Status.Fold && character.MyStatus != Status.GameOver)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// １人を除いて全員がフォールドした場合
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAllFold()
+        {
+            int foldCount = 0;
+
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus == Status.Fold || character.MyStatus == Status.GameOver)
+                {
+                    foldCount++;
+                }
+            }
+
+            if (foldCount >= characterList.Count - 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// １人を除いて全員がゲームオーバーの場合
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAllGameOver()
+        {
+            int gameOverCount = 0;
+
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus == Status.GameOver)
+                {
+                    gameOverCount++;
+                }
+            }
+
+            if (gameOverCount >= characterList.Count - 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// フォールドしていないキャラクターを返す（IsAllFoldがtrueだった場合に使う）
+        /// </summary>
+        /// <returns>フォールドしていないキャラクター</returns>
+        public static Character NonFoldCharacter()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.Fold)
+                {
+                    return character;
+                }
+            }
+
+            return characterList[0];
+        }
+
+        /// <summary>
+        /// 全員がカード交換したかを判定する
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAllChanged()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.ChangeHand && character.MyStatus != Status.Fold &&
+                    character.MyStatus != Status.GameOver)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// ラウンド開始時、キャラクターのステータスをデフォルトに戻す
+        /// </summary>
+        public static void NewRoundStatusReset()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus == Status.GameOver)
+                {
+                    character.MyStatus = Status.Default;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 誰かがレイズした時、他のキャラクターのステータスをデフォルトに戻す
+        /// </summary>
+        /// <param name="nowCharacter">レイズしたキャラクター</param>
+        public static void RaisedStatusReset(Character nowCharacter)
+        {
+            foreach(var character in characterList)
+            {
+                if (character != nowCharacter && 
+                    character.MyStatus != Status.Fold && character.MyStatus != Status.GameOver)
+                {
+                    character.MyStatus = Status.Default;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 勝負に参加できるキャラクターのリストを返す
+        /// </summary>
+        /// <returns></returns>
+        public static List<Character> GetAliveCharacterList()
+        {
+            List<Character> aliveCharacterList = new List<Character>();
+
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.Fold && character.MyStatus != Status.GameOver)
+                {
+                    aliveCharacterList.Add(character);
+                }
+            }
+
+            return aliveCharacterList;
+        }
+
+        /// <summary>
+        /// 手札を非表示にする
+        /// </summary>
+        public static void HandClear()
+        {
+            foreach (var character in characterList)
+            {
+                character.MyArea.HandHide();
+            }
+        }
+
+        /// <summary>
+        /// 手札を配る
+        /// </summary>
+        public static void CreateHand()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                Thread.Sleep(300);
+                foreach (var character in characterList)
+                {
+                    if (character.MyStatus != Status.GameOver)
+                    {
+                        character.Hand[i] = Dealer.DealCard();
+                        character.HandDisplay(i);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 参加費を払う
+        /// </summary>
+        public static void Entry()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.MyStatus != Status.GameOver)
+                {
+                    character.EntryChip();
+                }
+            }
+        }
+
+        /// <summary>
+        /// ゲームオーバーになったキャラを判定する
+        /// </summary>
+        public static void GameOverCheck()
+        {
+            foreach (var character in characterList)
+            {
+                if (character.HoldChip <= 0)
+                {
+                    character.MyStatus = Status.GameOver;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 各キャラクターの順位を表示する
+        /// </summary>
+        public static void RankingDisplay()
+        {
+            // 所持チップの多い順に並べ替える
+            var ranking = characterList.OrderByDescending(x => x.HoldChip);
+
+            int rank = 1;
+            int keepRank = 1;
+            int keepChip = 0;
+
+            // 順番に表示する
+            foreach (var character in ranking)
+            {
+                if (character.HoldChip == keepChip)
+                {
+                    character.MyArea.RankDisplay(keepRank);
+                }
+                else
+                {
+                    character.MyArea.RankDisplay(rank);
+                    keepRank = rank;
+                }
+
+                rank++;
+                keepChip = character.HoldChip;
+            }
         }
     }
 }

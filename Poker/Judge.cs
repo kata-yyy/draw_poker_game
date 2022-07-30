@@ -114,7 +114,7 @@ namespace PlayingCards
             if (IsFlush(suitCount))
             {
                 // 数字が「１０」、「１１」、「１２」、「１３」、「１」
-                if (numCount[10] == 1 && numCount[11] == 1 && numCount[12] == 1 && 
+                if (numCount[10] == 1 && numCount[11] == 1 && numCount[12] == 1 &&
                     numCount[13] == 1 && numCount[1] == 1)
                 {
                     return true;
@@ -149,7 +149,7 @@ namespace PlayingCards
         public static bool IsFourOfKind(int[] numCount)
         {
             // カウントが４の数字があればtrue
-            for(int i = 1; i <= 13; i++)
+            for (int i = 1; i <= 13; i++)
             {
                 if (numCount[i] == 4)
                 {
@@ -338,11 +338,11 @@ namespace PlayingCards
         /// <returns>勝者</returns>
         public static Character GetWinner(Character character1, Character character2)
         {
-            if (character1.Role > character2.Role)
+            if (character1.MyRole > character2.MyRole)
             {
                 return character1;
             }
-            else if (character1.Role < character2.Role)
+            else if (character1.MyRole < character2.MyRole)
             {
                 return character2;
             }
@@ -360,7 +360,7 @@ namespace PlayingCards
         /// <returns>勝者</returns>
         public static Character WinnerRoleDraw(Character character1, Character character2)
         {
-            switch (character1.Role)
+            switch (character1.MyRole)
             {
                 case Role.RoyalFlush:
                     return WinnerRoyalFlush(character1, character2);
@@ -420,7 +420,7 @@ namespace PlayingCards
             {
                 return character1;
             }
-            
+
             return character2;
         }
 
@@ -640,7 +640,7 @@ namespace PlayingCards
             {
                 return character1;
             }
-            else if(roleNum1 < roleNum2)
+            else if (roleNum1 < roleNum2)
             {
                 return character2;
             }

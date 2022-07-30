@@ -119,9 +119,9 @@ namespace PlayingCards
         /// 所持しているチップ数を更新して表示する
         /// </summary>
         /// <param name="holdChip">表示するチップ数</param>
-        public void HoldChipDisplay(int holdChip)
+        public void HoldChipDisplay()
         {
-            HoldChip.Text = $"残チップ [{holdChip}]枚";
+            HoldChip.Text = $"残チップ [{MyCharacter.HoldChip}]枚";
             PokerForm.Instance.Refresh();
         }
 
@@ -129,9 +129,9 @@ namespace PlayingCards
         /// 場に出したチップ数を更新して表示する
         /// </summary>
         /// <param name="betChip">表示するチップ数</param>
-        public void BetChipDisplay(int betChip)
+        public void BetChipDisplay()
         {
-            BetChip.Text = $"総ベット額 [{betChip}]枚";
+            BetChip.Text = $"総ベット額 [{MyCharacter.BetChip}]枚";
             PokerForm.Instance.Refresh();
         }
 
@@ -163,25 +163,20 @@ namespace PlayingCards
         }
 
         /// <summary>
-        /// ベット、レイズ、カード交換時のメッセージを表示する
+        /// ベット、レイズ時のメッセージを表示する
         /// </summary>
         /// <param name="action">選択したアクション</param>
-        /// <param name="num">チップ数、又はカード枚数</param>
-
-        public void ActionMessageDisplay(Action action, int num)
+        /// <param name="chip">チップ数</param>
+        public void ActionMessageDisplay(Action action, int chip)
         {
             switch (action)
             {
                 case Action.Bet:
-                    ActionMessage.Text = $"ベット\nチップ{num}枚";
+                    ActionMessage.Text = $"ベット\nチップ{chip}枚";
                     PokerForm.Instance.Refresh();
                     return;
                 case Action.Raise:
-                    ActionMessage.Text = $"レイズ\nチップ{num}枚";
-                    PokerForm.Instance.Refresh();
-                    return;
-                case Action.CardChange:
-                    ActionMessage.Text = $"カード交換\n{num}枚";
+                    ActionMessage.Text = $"レイズ\nチップ{chip}枚";
                     PokerForm.Instance.Refresh();
                     return;
                 default:
@@ -192,12 +187,22 @@ namespace PlayingCards
         }
 
         /// <summary>
+        /// 手札交換時のメッセージを表示する
+        /// </summary>
+        /// <param name="cardCount">交換枚数</param>
+        public void ChangeMessageDisplay(int cardCount)
+        {
+            ActionMessage.Text = $"カード交換\n{cardCount}枚";
+            PokerForm.Instance.Refresh();
+        }
+
+        /// <summary>
         /// 役を表示する
         /// </summary>
         /// <param name="role">役</param>
         public void RoleDisplay()
         {
-            switch (MyCharacter.Role)
+            switch (MyCharacter.MyRole)
             {
                 case Role.RoyalFlush:
                     ActionMessage.Text = "Rストレート\nフラッシュ";
@@ -244,6 +249,16 @@ namespace PlayingCards
                     PokerForm.Instance.Refresh();
                     return;
             }
+        }
+
+        /// <summary>
+        /// 順位を表示する
+        /// </summary>
+        /// <param name="rank">順位</param>
+        public void RankDisplay(int rank)
+        {
+            ActionMessage.Text = $"　　{rank}位";
+            PokerForm.Instance.Refresh();
         }
 
         /// <summary>
