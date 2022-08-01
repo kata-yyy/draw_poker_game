@@ -11,6 +11,10 @@ namespace PlayingCards
     {
         Random random = new Random();
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="name">NPCの名前</param>
         public NonPlayerCharacter(string name) : base(name)
         {
         }

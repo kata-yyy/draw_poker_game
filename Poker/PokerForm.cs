@@ -14,20 +14,17 @@ namespace PlayingCards
     public partial class PokerForm : Form
     {
         public static PokerForm Instance;
+
         public PokerForm()
         {
             InitializeComponent();
 
             Instance = this;
 
-            Image.CardImageRotate90();
-            Image.CardImageRotate180();
-            Image.CardImageRotate270();
+            PokerMain.StartUp();
 
-            //MenuForm menuForm = new MenuForm();
-            //menuForm.Show();
-
-            PokerMain.GameStart();
+            MenuForm menuForm = new MenuForm();
+            menuForm.Show();
         }
     }
 }

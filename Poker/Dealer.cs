@@ -119,7 +119,7 @@ namespace PlayingCards
             foreach (var character in characterList)
             {
                 character.BetChip = 0;
-                character.MyArea.BetChipDisplay(character.BetChip);
+                character.MyArea.BetChipDisplay();
             }
         }
     }

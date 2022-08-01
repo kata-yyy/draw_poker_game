@@ -9,8 +9,15 @@ namespace PlayingCards
 {
     internal class PlayerCharacter : Character
     {
+        /// <summary>
+        /// プレイヤーが操作するためのコントローラー
+        /// </summary>
         public Controller MyController { get; set; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="name">プレイヤーの名前</param>
         public PlayerCharacter(string name) : base(name)
         {
         }

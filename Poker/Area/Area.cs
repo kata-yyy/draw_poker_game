@@ -13,23 +13,23 @@ namespace PlayingCards
         /// <summary>
         /// 名前を表示するラベル
         /// </summary>
-        public Label Name { get; set; }
+        public Label NameLabel { get; set; }
         /// <summary>
         /// 所持チップを表示するラベル
         /// </summary>
-        public Label HoldChip { get; set; }
+        public Label HoldChipLabel { get; set; }
         /// <summary>
         /// 場に出したチップを表示するラベル
         /// </summary>
-        public Label BetChip { get; set; }
+        public Label BetChipLabel { get; set; }
         /// <summary>
         /// 実行メッセージを表示するラベル
         /// </summary>
-        public Label ActionMessage { get; set; }
+        public Label ActionMessageLabel { get; set; }
         /// <summary>
         /// 手札を表示するピクチャーボックス
         /// </summary>
-        public List<PictureBox> Hand { get; set; } = new List<PictureBox>();
+        public List<PictureBox> HandPictureBox { get; set; } = new List<PictureBox>();
         /// <summary>
         /// このエリアを所持するプレイヤー
         /// </summary>
@@ -38,12 +38,9 @@ namespace PlayingCards
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="name">プレイヤーの名前</param>
-        /// <param name="myPlayer">このエリアを所持するプレイヤー</param>
-        public Area(Character myPlayer)
+        public Area()
         {
-            MyCharacter = myPlayer;
-            CreateName(MyCharacter.Name);
+            CreateName();
             CreateHoldChip();
             CreateBetChip();
             CreateActionMessage();
@@ -54,13 +51,13 @@ namespace PlayingCards
         /// 名前を表示するラベルを生成
         /// </summary>
         /// <param name="name"></param>
-        void CreateName(string name)
+        void CreateName()
         {
-            Name = new Label();
-            Name.Font = new Font("MS UI Gothic", 25);
-            Name.Text = name;
-            Name.AutoSize = true;
-            Name.Parent = PokerForm.Instance;
+            NameLabel = new Label();
+            NameLabel.Font = new Font("MS UI Gothic", 25);
+            NameLabel.Text = "";
+            NameLabel.AutoSize = true;
+            NameLabel.Parent = PokerForm.Instance;
         }
 
         /// <summary>
@@ -68,11 +65,11 @@ namespace PlayingCards
         /// </summary>
         void CreateHoldChip()
         {
-            HoldChip = new Label();
-            HoldChip.Font = new Font("MS UI Gothic", 20);
-            HoldChip.Text = $"残チップ [{MyCharacter.HoldChip}]枚";
-            HoldChip.AutoSize = true;
-            HoldChip.Parent = PokerForm.Instance;
+            HoldChipLabel = new Label();
+            HoldChipLabel.Font = new Font("MS UI Gothic", 20);
+            HoldChipLabel.Text = $"残チップ []枚";
+            HoldChipLabel.AutoSize = true;
+            HoldChipLabel.Parent = PokerForm.Instance;
         }
 
         /// <summary>
@@ -80,11 +77,11 @@ namespace PlayingCards
         /// </summary>
         void CreateBetChip()
         {
-            BetChip = new Label();
-            BetChip.Font = new Font("MS UI Gothic", 20);
-            BetChip.Text = $"総ベット額 [{MyCharacter.BetChip}]枚";
-            BetChip.AutoSize = true;
-            BetChip.Parent = PokerForm.Instance;
+            BetChipLabel = new Label();
+            BetChipLabel.Font = new Font("MS UI Gothic", 20);
+            BetChipLabel.Text = $"総ベット額 []枚";
+            BetChipLabel.AutoSize = true;
+            BetChipLabel.Parent = PokerForm.Instance;
         }
 
         /// <summary>
@@ -92,11 +89,11 @@ namespace PlayingCards
         /// </summary>
         void CreateActionMessage()
         {
-            ActionMessage = new Label();
-            ActionMessage.Font = new Font("MS UI Gothic", 20);
-            ActionMessage.AutoSize = true;
-            ActionMessage.TextAlign = ContentAlignment.MiddleCenter;
-            ActionMessage.Parent = PokerForm.Instance;
+            ActionMessageLabel = new Label();
+            ActionMessageLabel.Font = new Font("MS UI Gothic", 20);
+            ActionMessageLabel.AutoSize = true;
+            ActionMessageLabel.TextAlign = ContentAlignment.MiddleCenter;
+            ActionMessageLabel.Parent = PokerForm.Instance;
         }
 
         /// <summary>
@@ -111,8 +108,18 @@ namespace PlayingCards
                 card.SizeMode = PictureBoxSizeMode.StretchImage;
                 card.Visible = false;
                 card.Parent = PokerForm.Instance;
-                Hand.Add(card);
+                HandPictureBox.Add(card);
             }
+        }
+
+        /// <summary>
+        /// 名前を表示する
+        /// </summary>
+        public void NameDisplay()
+        {
+            NameLabel.Text = MyCharacter.Name;
+            NameLabel.Visible = true;
+            PokerForm.Instance.Refresh();
         }
 
         /// <summary>
@@ -121,7 +128,8 @@ namespace PlayingCards
         /// <param name="holdChip">表示するチップ数</param>
         public void HoldChipDisplay()
         {
-            HoldChip.Text = $"残チップ [{MyCharacter.HoldChip}]枚";
+            HoldChipLabel.Text = $"残チップ [{MyCharacter.HoldChip}]枚";
+            HoldChipLabel.Visible = true;
             PokerForm.Instance.Refresh();
         }
 
@@ -131,7 +139,8 @@ namespace PlayingCards
         /// <param name="betChip">表示するチップ数</param>
         public void BetChipDisplay()
         {
-            BetChip.Text = $"総ベット額 [{MyCharacter.BetChip}]枚";
+            BetChipLabel.Text = $"総ベット額 [{MyCharacter.BetChip}]枚";
+            BetChipLabel.Visible = true;
             PokerForm.Instance.Refresh();
         }
 
@@ -144,22 +153,21 @@ namespace PlayingCards
             switch (action)
             {
                 case Action.Check:
-                    ActionMessage.Text = "チェック";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "チェック";
+                    break;
                 case Action.Call:
-                    ActionMessage.Text = "　コール";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "　コール";
+                    break;
                 case Action.Fold:
-                    ActionMessage.Text = "フォールド";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "フォールド";
+                    break;
                 default:
-                    ActionMessage.Text = "";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "";
+                    break;
             }
+
+            ActionMessageLabel.Visible = true;
+            PokerForm.Instance.Refresh();
         }
 
         /// <summary>
@@ -172,18 +180,18 @@ namespace PlayingCards
             switch (action)
             {
                 case Action.Bet:
-                    ActionMessage.Text = $"ベット\nチップ{chip}枚";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = $"ベット\nチップ{chip}枚";
+                    break;
                 case Action.Raise:
-                    ActionMessage.Text = $"レイズ\nチップ{chip}枚";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = $"レイズ\nチップ{chip}枚";
+                    break;
                 default:
-                    ActionMessage.Text = "";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "";
+                    break;
             }
+
+            ActionMessageLabel.Visible = true;
+            PokerForm.Instance.Refresh();
         }
 
         /// <summary>
@@ -192,7 +200,8 @@ namespace PlayingCards
         /// <param name="cardCount">交換枚数</param>
         public void ChangeMessageDisplay(int cardCount)
         {
-            ActionMessage.Text = $"カード交換\n{cardCount}枚";
+            ActionMessageLabel.Text = $"カード交換\n{cardCount}枚";
+            ActionMessageLabel.Visible = true;
             PokerForm.Instance.Refresh();
         }
 
@@ -205,50 +214,42 @@ namespace PlayingCards
             switch (MyCharacter.MyRole)
             {
                 case Role.RoyalFlush:
-                    ActionMessage.Text = "Rストレート\nフラッシュ";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "Rストレート\nフラッシュ";
+                    break;
                 case Role.StraightFlush:
-                    ActionMessage.Text = "ストレート\nフラッシュ";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "ストレート\nフラッシュ";
+                    break;
                 case Role.FourOfKind:
-                    ActionMessage.Text = "フォーカード";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "フォーカード";
+                    break;
                 case Role.FullHouse:
-                    ActionMessage.Text = "フルハウス";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "フルハウス";
+                    break;
                 case Role.Flush:
-                    ActionMessage.Text = "フラッシュ";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "フラッシュ";
+                    break;
                 case Role.Straight:
-                    ActionMessage.Text = "ストレート";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "ストレート";
+                    break;
                 case Role.ThreeOfKind:
-                    ActionMessage.Text = "スリーカード";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "スリーカード";
+                    break;
                 case Role.TwoPair:
-                    ActionMessage.Text = "ツーペア";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "ツーペア";
+                    break;
                 case Role.Pair:
-                    ActionMessage.Text = "ワンペア";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "ワンペア";
+                    break;
                 case Role.HighCard:
-                    ActionMessage.Text = "ハイカード";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "ハイカード";
+                    break;
                 default:
-                    ActionMessage.Text = "";
-                    PokerForm.Instance.Refresh();
-                    return;
+                    ActionMessageLabel.Text = "";
+                    break;
             }
+
+            ActionMessageLabel.Visible = true;
+            PokerForm.Instance.Refresh();
         }
 
         /// <summary>
@@ -257,7 +258,18 @@ namespace PlayingCards
         /// <param name="rank">順位</param>
         public void RankDisplay(int rank)
         {
-            ActionMessage.Text = $"　　{rank}位";
+            ActionMessageLabel.Text = $"　　{rank}位";
+            ActionMessageLabel.Visible = true;
+            PokerForm.Instance.Refresh();
+        }
+
+        /// <summary>
+        /// アクションメッセージをクリアする
+        /// </summary>
+        public void ActionMessageClear()
+        {
+            ActionMessageLabel.Text = "";
+            ActionMessageLabel.Visible = true;
             PokerForm.Instance.Refresh();
         }
 
@@ -266,14 +278,14 @@ namespace PlayingCards
         /// </summary>
         public void AreaDisplay()
         {
-            Name.Visible = true;
-            HoldChip.Visible = true;
-            BetChip.Visible = true;
-            ActionMessage.Visible = true;
+            NameLabel.Visible = true;
+            HoldChipLabel.Visible = true;
+            BetChipLabel.Visible = true;
+            ActionMessageLabel.Visible = true;
 
-            for (int i = 0; i < Hand.Count; i++)
+            for (int i = 0; i < HandPictureBox.Count; i++)
             {
-                Hand[i].Visible = true;
+                HandPictureBox[i].Visible = true;
             }
             PokerForm.Instance.Refresh();
         }
@@ -283,14 +295,14 @@ namespace PlayingCards
         /// </summary>
         public void AreaHide()
         {
-            Name.Visible = false;
-            HoldChip.Visible = false;
-            BetChip.Visible = false;
-            ActionMessage.Visible = false;
+            NameLabel.Visible = false;
+            HoldChipLabel.Visible = false;
+            BetChipLabel.Visible = false;
+            ActionMessageLabel.Visible = false;
 
-            for (int i = 0; i < Hand.Count; i++)
+            for (int i = 0; i < HandPictureBox.Count; i++)
             {
-                Hand[i].Visible = false;
+                HandPictureBox[i].Visible = false;
             }
             PokerForm.Instance.Refresh();
         }

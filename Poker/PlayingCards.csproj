@@ -46,9 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Character\CharacterCreater.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="Enum\Action.cs" />
+    <Compile Include="Enum\Phase.cs" />
     <Compile Include="Enum\Suit.cs" />
     <Compile Include="Dealer.cs" />
     <Compile Include="Enum\Role.cs" />

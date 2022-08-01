@@ -79,7 +79,7 @@ namespace PlayingCards
 
             MyStatus = Status.Check;
 
-            PokerMain.TurnEnd(this);
+            PokerMain.TurnEnd();
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace PlayingCards
             PokerMain.callChip = BetChip;
             MyStatus = Status.Raise;
 
-            PokerMain.TurnEnd(this);
+            PokerMain.TurnEnd();
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace PlayingCards
 
             MyStatus = Status.Call;
 
-            PokerMain.TurnEnd(this);
+            PokerMain.TurnEnd();
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace PlayingCards
             PokerMain.callChip = BetChip;
             MyStatus = Status.Raise;
 
-            PokerMain.TurnEnd(this);
+            PokerMain.TurnEnd();
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace PlayingCards
 
             MyStatus = Status.Fold;
 
-            PokerMain.TurnEnd(this);
+            PokerMain.TurnEnd();
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace PlayingCards
 
             MyStatus = Status.ChangeHand;
 
-            PokerMain.ChangeHandEnd(this);
+            PokerMain.ChangeHandEnd();
         }
 
         abstract public void HandDisplay();

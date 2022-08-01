@@ -10,47 +10,154 @@ namespace PlayingCards
 {
     internal class PokerMain
     {
+        // エリア
+        public static Area1 area1;
+        public static Area2 area2;
+        public static Area3 area3;
+        public static Area4 area4;
+
+        // キャラクター
+        public static PlayerCharacter player;
+        public static NonPlayerCharacter cpu1;
+        public static NonPlayerCharacter cpu2;
+        public static NonPlayerCharacter cpu3;
+
+        /// <summary>
+        /// 親を決めるための乱数
+        /// </summary>
         static Random random = new Random();
-
-        // 初期値
+        /// <summary>
+        /// ゲーム開始時の所持チップ
+        /// </summary>
         public static int startChip = 100;
+        /// <summary>
+        /// ベット、レイズ時の最低チップ額
+        /// </summary>
         public static int minBetChip = 1;
+        /// <summary>
+        /// ベット、レイズ時の最大チップ額
+        /// </summary>
         public static int maxBetChip = 5;
+        /// <summary>
+        /// ラウンド開始時に払う参加費
+        /// </summary>
         public static int entryChip = 1;
-
+        /// <summary>
+        /// プレイヤーが操作するためのコントローラー
+        /// </summary>
+        public static Controller controller;
+        /// <summary>
+        /// 参加人数
+        /// </summary>
         public static int maxCharacter = 4;
+        /// <summary>
+        /// 全ラウンド数
+        /// </summary>
         public static int maxRound = 1;
-
+        /// <summary>
+        /// 現在のラウンド
+        /// </summary>
         public static int roundCount = 0;
+        /// <summary>
+        /// ベット済かを判定するフラグ
+        /// </summary>
         public static bool isAfterBet = false;
+        /// <summary>
+        /// カード交換済かを判定するフラグ
+        /// </summary>
         public static bool isAfterChange = false;
-
+        /// <summary>
+        /// コールした場合、ベットすることになるチップ数
+        /// </summary>
         public static int callChip = 0;
+        /// <summary>
+        /// ゲームに参加しているキャラクターのリスト
+        /// </summary>
         public static List<Character> characterList = new List<Character>();
+        /// <summary>
+        /// そのラウンドで一番最初にアクションを行うキャラクター
+        /// </summary>
         public static Character startCharacter;
+        /// <summary>
+        /// 現在アクションを行っているキャラクター
+        /// </summary>
+        public static Character nowCharacter;
+        /// <summary>
+        /// そのラウンドの勝者
+        /// </summary>
+        public static Character winner;
+        /// <summary>
+        /// 現在のフェーズ
+        /// </summary>
+        public static Phase nowPhase;
+
+        /// <summary>
+        /// 起動時に行う処理
+        /// </summary>
+        public static void StartUp()
+        {
+            // 回転したイメージ画像を用意しておく
+            Image.CardImageRotate90();
+            Image.CardImageRotate180();
+            Image.CardImageRotate270();
+
+            // エリアのインスタンス生成
+            area1 = new Area1();
+            area2 = new Area2();
+            area3 = new Area3();
+            area4 = new Area4();
+            controller = new Controller();
+
+            // エリアを非表示
+            area1.AreaHide();
+            area2.AreaHide();
+            area3.AreaHide();
+            area4.AreaHide();
+
+            // キャラクターのインスタンス生成
+            player = new PlayerCharacter("プレイヤー");
+            cpu1 = new NonPlayerCharacter("CPU1");
+            cpu2 = new NonPlayerCharacter("CPU2");
+            cpu3 = new NonPlayerCharacter("CPU3");
+
+            // コントローラーとプレイヤーの紐づけ
+            player.MyController = controller;
+            controller.MyPlayer = player;
+        }
 
         /// <summary>
         /// 新しくポーカーを開始する
         /// </summary>
         public static void GameStart()
         {
-            // キャラクター生成
-            CharacterCreater.NewCreate(maxCharacter);
+            // 全てのエリアを非表示
+            area1.AreaHide();
+            area2.AreaHide();
+            area3.AreaHide();
+            area4.AreaHide();
+
+            // 参加人数に応じて、キャラクターの設定を行う
+            CharacterSetting();
 
             // エリアの表示
             foreach (var character in characterList)
             {
-                character.MyArea.AreaDisplay();
+                character.MyArea.NameDisplay();
+                character.HoldChip = startChip;
+                character.MyArea.HoldChipDisplay();
+                character.BetChip = 0;
+                character.MyArea.BetChipDisplay();
             }
 
             // 最初にアクションを起こすキャラクターを設定
-            startCharacter = characterList[0];
+            StartCharacterSet();
 
             // ラウンド数を初期化
             roundCount = 0;
 
-            // 新しいラウンドを開始する
-            RoundStart();
+            // メッセージを表示後、ラウンドスタートへ
+            nowPhase = Phase.GameStart;
+            controller.SystemMessageDisplay();
         }
 
         /// <summary>
@@ -60,6 +167,10 @@ namespace PlayingCards
         {
             // 順位を表示
             RankingDisplay();
+
+            // メッセージ表示後、次のゲームへ
+            nowPhase = Phase.NextGame;
+            controller.SystemMessageDisplay();
         }
 
         /// <summary>
@@ -74,6 +185,9 @@ namespace PlayingCards
             // ラウンド数をカウントアップ
             roundCount++;
 
+            // アクションメッセージを非表示
+            ActionMessageClear();
+
             // 山札を作る
             Dealer.CreateDeck(0);
 
@@ -81,14 +195,12 @@ namespace PlayingCards
             CreateHand();
 
             // 参加費を払う
-            
-            foreach (var character in characterList)
-            {
-                character.EntryChip();
-            }
+            Entry();
 
-            // キャラクター毎のアクションを開始する
-            TurnStart(startCharacter);
+            // メッセージ表示後、キャラクター毎のアクションを開始する
+            nowCharacter = startCharacter;
+            nowPhase = Phase.RoundStart;
+            controller.SystemMessageDisplay();
         }
 
         /// <summary>
@@ -96,7 +208,7 @@ namespace PlayingCards
         /// </summary>
         public static void RoundEnd()
         {
-            // 手札をを全て非表示にする
+            // 手札を非表示にする
             HandClear();
 
             // ゲームオーバーになったキャラを判定する
@@ -105,18 +217,21 @@ namespace PlayingCards
             // 参加可能なキャラクターが1人以下ならゲーム終了へ
             if (IsAllGameOver())
             {
-                GameEnd();
+                nowPhase = Phase.AllGameOver;
+                controller.SystemMessageDisplay();
                 return;
             }
 
             if (roundCount >= maxRound)
             {
                 // 全ラウンドが終了したならゲーム終了へ
-                GameEnd();
+                nowPhase = Phase.GameEnd;
+                controller.SystemMessageDisplay();
             }
             else
             {
                 // まだラウンドが残っているなら次のラウンドへ
+                startCharacter = startCharacter.NextCharacter;
                 RoundStart();
             }
         }
@@ -125,7 +240,7 @@ namespace PlayingCards
         /// 各キャラクターがアクションを選択する
         /// </summary>
         /// <param name="nowCharacter"></param>
-        public static void TurnStart(Character nowCharacter)
+        public static void TurnStart()
         {
             // フォールド済、ゲームオーバーでないならアクションを選択
             if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
@@ -144,7 +259,7 @@ namespace PlayingCards
             else
             {
                 // フォールド済、ゲームオーバーならアクション選択を行わない
-                TurnEnd(nowCharacter);
+                TurnEnd();
             }
         }
 
@@ -152,28 +267,31 @@ namespace PlayingCards
         /// アクション終了後の処理
         /// </summary>
         /// <param name="nowCharacter"></param>
-        public static void TurnEnd(Character nowCharacter)
+        public static void TurnEnd()
         {
             // ベット、又はレイズが行われた場合、他のステータスをデフォルトに戻す
             if (nowCharacter.MyStatus == Status.Raise)
             {
                 isAfterBet = true;
-                RaisedStatusReset(nowCharacter);
+                RaisedStatusReset();
             }
 
             // 全員がチェックを選択した場合
             if (IsAllCheck())
             {
+                // カード交換済なら勝負、そうでなければラウンド終了
                 if (isAfterChange)
                 {
                     // カード交換済なら勝負する
-                    BattleStart();
+                    nowPhase = Phase.BattleStart;
+                    controller.SystemMessageDisplay();
                 }
                 else
                 {
-                    // カード交換前なら場のチップを回収してラウンド終了
+                    // メッセージ表示後、てラウンド終了
                     Dealer.ChipClear(characterList);
-                    RoundEnd();
+                    nowPhase = Phase.AllCheck;
+                    controller.SystemMessageDisplay();
                 }
                 return;
             }
@@ -181,15 +299,19 @@ namespace PlayingCards
             // レイズしないまま１週した場合
             if (IsAllCall())
             {
+                // カード交換済なら勝負、そうでなければカード交換
                 if (isAfterChange)
                 {
                     // カード交換済なら勝負する
-                    BattleStart();
+                    nowPhase = Phase.BattleStart;
+                    controller.SystemMessageDisplay();
                 }
                 else
                 {
-                    // カード交換前ならカード交換を行う
-                    ChangeHandStart(startCharacter);
+                    // メッセージ表示後、カード交換を行う
+                    nowCharacter = startCharacter;
+                    nowPhase = Phase.ChangeHandStart;
+                    controller.SystemMessageDisplay();
                 }
                 return;
             }
@@ -198,20 +320,22 @@ namespace PlayingCards
             if (IsAllFold())
             {
                 // 残った一人を勝者とする
-                Character winner = NonFoldCharacter();
-                BattleEnd(winner);
+                winner = NonFoldCharacter();
+                nowPhase = Phase.AllFold;
+                controller.SystemMessageDisplay();
                 return;
             }
 
             // 次のキャラクターがアクションを選択する
-            TurnStart(nowCharacter.NextCharacter);
+            nowCharacter = nowCharacter.NextCharacter;
+            TurnStart();
         }
 
         /// <summary>
         /// 各キャラクターがカード交換を行う
         /// </summary>
         /// <param name="nowCharacter"></param>
-        public static void ChangeHandStart(Character nowCharacter)
+        public static void ChangeHandStart()
         {
             // フォールド済、ゲームオーバーでないならカード交換を行う
             if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
@@ -221,7 +345,7 @@ namespace PlayingCards
             else
             {
                 // フォールド済、ゲームオーバーならカード交換を行わない
-                ChangeHandEnd(nowCharacter);
+                ChangeHandEnd();
             }
         }
 
@@ -229,19 +353,23 @@ namespace PlayingCards
         /// カード交換終了後の処理
         /// </summary>
         /// <param name="nowCharacter"></param>
-        public static void ChangeHandEnd(Character nowCharacter)
+        public static void ChangeHandEnd()
         {
+            // 全員がカード交換したら、各キャラクターのアクション選択へ
             if (IsAllChanged())
             {
-                // 全員がカード交換したら、アクション選択へ移る
+                // メッセージ表示後、各キャラクターのアクション選択へ
                 isAfterBet = false;
                 isAfterChange = true;
-                TurnStart(startCharacter);
+                nowCharacter = startCharacter;
+                nowPhase = Phase.ChangeHandEnd;
+                controller.SystemMessageDisplay();
             }
             else
             {
                 // 次のキャラクターがカード交換を行う
-                ChangeHandStart(nowCharacter.NextCharacter);
+                nowCharacter = nowCharacter.NextCharacter;
+                ChangeHandStart();
             }
         }
 
@@ -262,23 +390,101 @@ namespace PlayingCards
             }
 
             // 勝者を決定する
-            Character winner = Judge.WinCharacter(aliveCharacterList);
+            winner = Judge.WinCharacter(aliveCharacterList);
 
-            // 勝負終了後の処理へ
-            BattleEnd(winner);
+            // メッセージ表示後、勝負終了後の処理へ
+            nowPhase = Phase.BattleEnd;
+            controller.SystemMessageDisplay();
         }
 
         /// <summary>
         /// 勝負終了後の処理
         /// </summary>
         /// <param name="winner"></param>
-        public static void BattleEnd(Character winner)
+        public static void BattleEnd()
         {
             // 場のチップを勝者へ移動する
             Dealer.ChipMove(winner, characterList);
 
             // ラウンド終了へ
             RoundEnd();
+        }
+
+        /// <summary>
+        /// 参加人数に応じてキャラクターの設定を行う
+        /// </summary>
+        public static void CharacterSetting()
+        {
+            characterList.Clear();
+
+            // プレイヤーの設定
+            player.MyArea = area1;
+            player.NextCharacter = cpu1;
+            area1.MyCharacter = player;
+            area1.NameLabel.Text = player.Name;
+            characterList.Add(player);
+
+            // 参加人数に応じてNPCの設定を行う
+            switch (maxCharacter)
+            {
+                case 2:
+                    // cpu1の設定
+                    cpu1.MyArea = area2;
+                    cpu1.NextCharacter = player;
+                    area2.MyCharacter = cpu1;
+                    area2.NameLabel.Text = cpu1.Name;
+                    characterList.Add(cpu1);
+                    // 使わないエリアを非表示
+                    area3.AreaHide();
+                    area4.AreaHide();
+                    return;
+                case 3:
+                    // cpu1の設定
+                    cpu1.MyArea = area3;
+                    cpu1.NextCharacter = cpu2;
+                    area3.MyCharacter = cpu1;
+                    area3.NameLabel.Text = cpu1.Name;
+                    characterList.Add(cpu1);
+                    // cpu2の設定
+                    cpu2.MyArea = area2;
+                    cpu2.NextCharacter = player;
+                    area2.MyCharacter = cpu2;
+                    area2.NameLabel.Text = cpu2.Name;
+                    characterList.Add(cpu2);
+                    // 使わないエリアを非表示
+                    area4.AreaHide();
+                    return;
+                case 4:
+                    // cpu1の設定
+                    cpu1.MyArea = area3;
+                    cpu1.NextCharacter = cpu2;
+                    area3.MyCharacter = cpu1;
+                    area3.NameLabel.Text = cpu1.Name;
+                    characterList.Add(cpu1);
+                    // cpu2の設定
+                    cpu2.MyArea = area2;
+                    cpu2.NextCharacter = cpu3;
+                    area2.MyCharacter = cpu2;
+                    area2.NameLabel.Text = cpu2.Name;
+                    characterList.Add(cpu2);
+                    // cpu3の設定
+                    cpu3.MyArea = area4;
+                    cpu3.NextCharacter = player;
+                    area4.MyCharacter = cpu3;
+                    area4.NameLabel.Text = cpu3.Name;
+                    characterList.Add(cpu3);
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// 最初にアクションを起こすキャラクターを設定
+        /// </summary>
+        public static void StartCharacterSet()
+        {
+            int randomNum = random.Next(characterList.Count);
+
+            startCharacter = characterList[randomNum];
         }
 
         /// <summary>
@@ -418,7 +624,7 @@ namespace PlayingCards
         /// 誰かがレイズした時、他のキャラクターのステータスをデフォルトに戻す
         /// </summary>
         /// <param name="nowCharacter">レイズしたキャラクター</param>
-        public static void RaisedStatusReset(Character nowCharacter)
+        public static void RaisedStatusReset()
         {
             foreach(var character in characterList)
             {
@@ -457,6 +663,17 @@ namespace PlayingCards
             foreach (var character in characterList)
             {
                 character.MyArea.HandHide();
+            }
+        }
+
+        /// <summary>
+        /// アクションメッセージをクリアにする
+        /// </summary>
+        public static void ActionMessageClear()
+        {
+            foreach (var character in characterList)
+            {
+                character.MyArea.ActionMessageClear();
             }
         }
 

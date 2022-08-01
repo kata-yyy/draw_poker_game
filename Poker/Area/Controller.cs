@@ -10,11 +10,19 @@ namespace PlayingCards
 {
     internal class Controller
     {
+        // 各コントロールのLocation
         public static Point betChipBoxLocation = new Point(930, 645);
         public static Point betButtonLocation = new Point(880, 680);
         public static Point checkButtonLocation = new Point(880, 715);
+        public static Point[] changeButtonLocation = new Point[]
+        {
+            new Point(390, 645), new Point(475, 645), new Point(560, 645), new Point(645, 645), new Point(730, 645)
+        };
         public static Point cardChangeButtonLocation = new Point(720, 700);
+        public static Point systemMessageLabelLocation = new Point(30, 610);
+        public static Point messageButtonLocation = new Point(280, 720);
 
+        // 各コントロールのSize
         public static Size changeButtonSize = new Size(80, 30);
         public static Size cardChangeButtonSize = new Size(90, 30);
         public static Size betChipBoxSize = new Size(35, 30);
@@ -26,6 +34,8 @@ namespace PlayingCards
         public static Size checkButtonSize = new Size(80, 30);
         public static Size callButtonSize = new Size(80, 30);
         public static Size foldButtonSize = new Size(90, 30);
+        public static Size systemMessageLabelSize = new Size(300, 100);
+        public static Size messageButtonSize = new Size(50, 30);
 
         /// <summary>
         /// 交換するカードを選ぶためのボタン（手札の枚数分）
@@ -76,6 +86,14 @@ namespace PlayingCards
         /// </summary>
         public Button FoldButton { get; set; }
         /// <summary>
+        /// ゲーム進行に関するメッセージを表示するテキストボックス
+        /// </summary>
+        public Label SystemMessageLabel { get; set; }
+        /// <summary>
+        /// メッセージを進めるためのボタン
+        /// </summary>
+        public Button MessageButton { get; set; }
+        /// <summary>
         /// 操作エリアを所有するプレイヤー
         /// </summary>
         public PlayerCharacter MyPlayer { get; set; }
@@ -84,14 +102,13 @@ namespace PlayingCards
         /// コンストラクタ
         /// </summary>
         /// <param name="myPlayer">操作エリアを所有するプレイヤー</param>
-        public Controller(PlayerCharacter myPlayer)
+        public Controller()
         {
-            MyPlayer = myPlayer;
-
             CreateChangeButton();
             CreateControlArea1();
             CreateControlArea2();
             CreateControlArea3();
+            CreateSystemMessageArea();
         }
 
         /// <summary>
@@ -110,14 +127,13 @@ namespace PlayingCards
             CardChangeButton.Click += new EventHandler(CardChangeButtonClicked);
 
             // 交換するカードを選ぶためのボタン群
-            for (int i = 0; i < MyPlayer.MyArea.Hand.Count; i++)
+            for (int i = 0; i < 5; i++)
             {
                 Button changeButton = new Button();
                 changeButton.Font = new Font("MS UI Gothic", 10);
                 changeButton.Text = "チェンジ";
                 changeButton.Size = changeButtonSize;
-                changeButton.Location = new Point(MyPlayer.MyArea.Hand[i].Location.X,
-                             MyPlayer.MyArea.Hand[i].Location.Y + MyPlayer.MyArea.Hand[i].Size.Height + 5);
+                changeButton.Location = changeButtonLocation[i];
                 changeButton.Enabled = false;
                 changeButton.Parent = PokerForm.Instance;
                 ChangeButtons.Add(changeButton);
@@ -240,6 +256,32 @@ namespace PlayingCards
         }
 
         /// <summary>
+        /// 進行メッセージに関するエリアを生成
+        /// </summary>
+        void CreateSystemMessageArea()
+        {
+            // ゲーム進行に関するメッセージを表示するテキストボックス
+            SystemMessageLabel = new Label();
+            SystemMessageLabel.Font = new Font("MS UI Gothic", 15);
+            SystemMessageLabel.Text = "";
+            SystemMessageLabel.Size = systemMessageLabelSize;
+            SystemMessageLabel.Location = systemMessageLabelLocation;
+            SystemMessageLabel.BorderStyle = BorderStyle.FixedSingle;
+            SystemMessageLabel.BackColor = Color.White;
+            SystemMessageLabel.Parent = PokerForm.Instance;
+
+            // メッセージを進めるためのボタン
+            MessageButton = new Button();
+            MessageButton.Font = new Font("MS UI Gothic", 15);
+            MessageButton.Text = "OK";
+            MessageButton.Size = messageButtonSize;
+            MessageButton.Location = messageButtonLocation;
+            MessageButton.Enabled = false;
+            MessageButton.Parent = PokerForm.Instance;
+            MessageButton.Click += new EventHandler(MessageButtonClicked);
+        }
+
+        /// <summary>
         /// 全てのボタンを無効にする
         /// </summary>
         public void AllButtonInvalid()
@@ -265,6 +307,12 @@ namespace PlayingCards
         /// </summary>
         public void CardChangeButtonClicked(object sender, EventArgs e)
         {
+            
+            foreach (var changeButton in ChangeButtons)
+            {
+                changeButton.Text = "チェンジ";
+            }
+            
             AllButtonInvalid();
             MyPlayer.ChangeHand();
         }
@@ -455,6 +503,121 @@ namespace PlayingCards
         {
             AllButtonInvalid();
             MyPlayer.Fold();
+        }
+
+        /// <summary>
+        /// 進行に関するメッセージを表示する
+        /// </summary>
+        public void SystemMessageDisplay()
+        {
+            MessageButton.Enabled = true;
+
+            switch (PokerMain.nowPhase)
+            {
+                case Phase.GameStart:
+                    SystemMessageLabel.Text = $"参加人数：{PokerMain.maxCharacter}　" +
+                                              $"ラウンド数：{PokerMain.maxRound}\nでゲームを開始します";
+                    return;
+                case Phase.RoundStart:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"カード交換前のベットを行います";
+                    return;
+                case Phase.AllCheck:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"誰もベットを行わなかったため、このラウンドを終了します";
+                    return;
+                case Phase.ChangeHandStart:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"全員のベットが終わりました\nカード交換を行います";
+                    return;
+                case Phase.ChangeHandEnd:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"全員のカード交換が終わりました\n" +
+                                              $"カード交換後のベットを行います";
+                    return;
+                case Phase.BattleStart:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"全員のベットが終わりました\n" +
+                                              $"勝負を行います";
+                    return;
+                case Phase.BattleEnd:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"{PokerMain.winner.Name} の勝利です";
+                    return;
+                case Phase.AllFold:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"{PokerMain.winner.Name} 以外の全員がフォールドしました" +
+                                              $"{PokerMain.winner.Name} の勝利です";
+                    return;
+                case Phase.AllGameOver:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"参加可能なプレイヤーが１人以下となったため、" +
+                                              $"以降のラウンドは行わず、順位を発表します";
+                    return;
+                case Phase.GameEnd:
+                    SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
+                                              $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
+                                              $"全てのラウンドが終了しました\n順位を発表します";
+                    return;
+                case Phase.NextGame:
+                    SystemMessageLabel.Text = $"ゲームを終了します\n" +
+                                              "OK を押すと次のゲームを開始します";
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// メッセージボタンクリック時
+        /// </summary>
+        public void MessageButtonClicked(object sender, EventArgs e)
+        {
+            MessageButton.Enabled = false;
+
+            switch (PokerMain.nowPhase)
+            {
+                case Phase.GameStart:
+                    PokerMain.RoundStart();
+                    return;
+                case Phase.RoundStart:
+                    PokerMain.TurnStart();
+                    return;
+                case Phase.AllCheck:
+                    PokerMain.RoundEnd();
+                    return;
+                case Phase.ChangeHandStart:
+                    PokerMain.ChangeHandStart();
+                    return;
+                case Phase.ChangeHandEnd:
+                    PokerMain.TurnStart();
+                    return;
+                case Phase.BattleStart:
+                    PokerMain.BattleStart();
+                    return;
+                case Phase.BattleEnd:
+                    PokerMain.BattleEnd();
+                    return;
+                case Phase.AllFold:
+                    PokerMain.BattleEnd();
+                    return;
+                case Phase.AllGameOver:
+                    PokerMain.GameEnd();
+                    return;
+                case Phase.GameEnd:
+                    PokerMain.GameEnd();
+                    return;
+                case Phase.NextGame:
+                    MenuForm menuForm = new MenuForm();
+                    menuForm.Show();
+                    return;
+            }
         }
     }
 }
