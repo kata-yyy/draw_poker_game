@@ -432,8 +432,9 @@ namespace PlayingCards
         /// <returns>勝者</returns>
         public static Character WinnerStraightFlush(Character character1, Character character2)
         {
-            int roleNum1 = character1.Hand.ToList().Max(x => x.Number);
-            int roleNum2 = character2.Hand.ToList().Max(x => x.Number);
+            // 手札の中で１番大きい数字で判定を行う
+            int roleNum1 = numConversion(character1.Hand.ToList().Max(x => x.Number));
+            int roleNum2 = numConversion(character2.Hand.ToList().Max(x => x.Number));
 
             // 手札の数字が大きいほうを勝者とする
             if (roleNum1 > roleNum2)
@@ -468,12 +469,12 @@ namespace PlayingCards
             {
                 if (numCount1[i] == 4)
                 {
-                    roleNum1 = i;
+                    roleNum1 = numConversion(i);
                 }
 
                 if (numCount2[i] == 4)
                 {
-                    roleNum2 = i;
+                    roleNum2 = numConversion(i);
                 }
             }
 
@@ -505,12 +506,12 @@ namespace PlayingCards
             {
                 if (numCount1[i] == 3)
                 {
-                    roleNum1 = i;
+                    roleNum1 = numConversion(i);
                 }
 
                 if (numCount2[i] == 3)
                 {
-                    roleNum2 = i;
+                    roleNum2 = numConversion(i);
                 }
             }
 
@@ -544,8 +545,8 @@ namespace PlayingCards
         public static Character WinnerStraight(Character character1, Character character2)
         {
             // 手札の中で一番大きい数字を取得する
-            int roleNum1 = character1.Hand.ToList().Max(x => x.Number);
-            int roleNum2 = character2.Hand.ToList().Max(x => x.Number);
+            int roleNum1 = numConversion(character1.Hand.ToList().Max(x => x.Number));
+            int roleNum2 = numConversion(character2.Hand.ToList().Max(x => x.Number));
 
             // 数字が大きいほうを勝者とする
             if (roleNum1 > roleNum2)
@@ -589,12 +590,12 @@ namespace PlayingCards
             {
                 if (numCount1[i] == 3)
                 {
-                    roleNum1 = i;
+                    roleNum1 = numConversion(i);
                 }
 
                 if (numCount2[i] == 3)
                 {
-                    roleNum2 = i;
+                    roleNum2 = numConversion(i);
                 }
             }
 
@@ -622,7 +623,7 @@ namespace PlayingCards
             int[] numCount2 = HandNumCount(character2.Hand);
 
             // ペアになっている数字の強い方を取得する
-            for (int i = 1; i <= 13; i++)
+            for (int i = 2; i <= 13; i++)
             {
                 if (numCount1[i] == 2)
                 {
@@ -633,6 +634,16 @@ namespace PlayingCards
                 {
                     roleNum2 = i;
                 }
+            }
+
+            // １がペアになっている場合、それが一番強い数字となる
+            if (numCount1[1] == 2)
+            {
+                roleNum1 = 14;
+            }
+            if (numCount2[1] == 2)
+            {
+                roleNum2 = 14;
             }
 
             // 数字が大きいほうを勝者とする
@@ -677,12 +688,12 @@ namespace PlayingCards
             {
                 if (numCount1[i] == 2)
                 {
-                    roleNum1 = i;
+                    roleNum1 = numConversion(i);
                 }
 
                 if (numCount2[i] == 2)
                 {
-                    roleNum2 = i;
+                    roleNum2 = numConversion(i);
                 }
             }
 
@@ -719,8 +730,8 @@ namespace PlayingCards
         public static Character WinnerHighCard(Character character1, Character character2)
         {
             // 手札の中で一番大きい数字を取得する
-            int roleNum1 = character1.Hand.ToList().Max(x => x.Number);
-            int roleNum2 = character2.Hand.ToList().Max(x => x.Number);
+            int roleNum1 = numConversion(character1.Hand.ToList().Max(x => x.Number));
+            int roleNum2 = numConversion(character2.Hand.ToList().Max(x => x.Number));
 
             // 数字が大きいほうを勝者とする
             if (roleNum1 > roleNum2)
@@ -743,6 +754,22 @@ namespace PlayingCards
             }
 
             return character2;
+        }
+
+        /// <summary>
+        /// １を一番強い数字とするための変換を行う
+        /// １が渡されたら１４を返し、１以外が渡されたら同じ数字を返す
+        /// </summary>
+        /// <param name="num">カードの数字</param>
+        /// <returns></returns>
+        public static int numConversion(int num)
+        {
+            if (num == 1)
+            {
+                return 14;
+            }
+
+            return num;
         }
     }
 }

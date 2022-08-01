@@ -195,7 +195,6 @@ namespace PlayingCards
                     Hand[i] = Dealer.DealCard();
                     HandDisplay(i);
                 }
-                IsChangeHand[i] = false;
             }
 
             MyStatus = Status.ChangeHand;

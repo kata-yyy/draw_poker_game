@@ -44,32 +44,42 @@ namespace PlayingCards
         /// </summary>
         public override void ChangeHandSelect()
         {
+            // フラグの初期化
+            for (int i = 0; i < IsChangeHand.Length; i++)
+            {
+                IsChangeHand[i] = false;
+            }
+
+            // ボタンを有効にする
             for (int i = 0; i < Hand.Length; i++)
             {
                 MyController.ChangeButtons[i].Enabled = true;
             }
-
             MyController.CardChangeButton.Enabled = true;
+
             PokerForm.Instance.Refresh();
         }
 
         /// <summary>
-        /// カード交換前、誰もベットしていない時の行動選択
+        /// 誰もベットしていない時の行動選択
         /// </summary>
         public override void ActionSelectBeforeBet()
         {
+            // ボタンを有効にする
             MyController.PlusButton.Enabled = true;
             MyController.MinusButton.Enabled = true;
             MyController.BetButton.Enabled = true;
             MyController.CheckButton.Enabled = true;
+
             PokerForm.Instance.Refresh();
         }
 
         /// <summary>
-        /// カード交換前、誰かがベットした後の行動選択
+        /// 誰かがベットした後の行動選択
         /// </summary>
         public override void ActionSelectAfterBet()
         {
+            // ボタンを有効にする
             MyController.PlusButton.Enabled = true;
             MyController.MinusButton.Enabled = true;
             MyController.CallButton.Enabled = true;
