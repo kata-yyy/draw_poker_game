@@ -29,7 +29,7 @@ namespace PlayingCards
         /// <summary>
         /// ゲーム開始時の所持チップ
         /// </summary>
-        public static int startChip = 100;
+        public static int startChip = 10;
         /// <summary>
         /// ベット、レイズ時の最低チップ額
         /// </summary>
@@ -197,6 +197,9 @@ namespace PlayingCards
             // 参加費を払う
             Entry();
 
+            // ステータスをデフォルトに戻す
+            NewRoundStatusReset();
+
             // メッセージ表示後、キャラクター毎のアクションを開始する
             nowCharacter = startCharacter;
             nowPhase = Phase.RoundStart;
@@ -243,16 +246,16 @@ namespace PlayingCards
         public static void TurnStart()
         {
             // フォールド済、ゲームオーバーでないならアクションを選択
-            if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
+            if (nowCharacter.MyStatus != Status.Fold && nowCharacter.MyStatus != Status.GameOver)
             {
                 if (isAfterBet)
                 {
-                    // ベット前のアクション選択
+                    // ベット後のアクション選択
                     nowCharacter.ActionSelectAfterBet();
                 }
                 else
                 {
-                    // ベット後のアクション選択
+                    // ベット前アクション選択
                     nowCharacter.ActionSelectBeforeBet();
                 }
             }
@@ -274,6 +277,16 @@ namespace PlayingCards
             {
                 isAfterBet = true;
                 RaisedStatusReset();
+            }
+
+            // １人を除いて全員がフォールドした場合
+            if (IsAllFold())
+            {
+                // 残った一人を勝者とする
+                winner = NonFoldCharacter();
+                nowPhase = Phase.AllFold;
+                controller.SystemMessageDisplay();
+                return;
             }
 
             // 全員がチェックを選択した場合
@@ -316,16 +329,6 @@ namespace PlayingCards
                 return;
             }
 
-            // １人を除いて全員がフォールドした場合
-            if (IsAllFold())
-            {
-                // 残った一人を勝者とする
-                winner = NonFoldCharacter();
-                nowPhase = Phase.AllFold;
-                controller.SystemMessageDisplay();
-                return;
-            }
-
             // 次のキャラクターがアクションを選択する
             nowCharacter = nowCharacter.NextCharacter;
             TurnStart();
@@ -338,7 +341,7 @@ namespace PlayingCards
         public static void ChangeHandStart()
         {
             // フォールド済、ゲームオーバーでないならカード交換を行う
-            if (nowCharacter.MyStatus != Status.Fold || nowCharacter.MyStatus != Status.GameOver)
+            if (nowCharacter.MyStatus != Status.Fold && nowCharacter.MyStatus != Status.GameOver)
             {
                 nowCharacter.ChangeHandSelect();
             }
@@ -539,7 +542,7 @@ namespace PlayingCards
                 }
             }
 
-            if (foldCount >= characterList.Count - 1)
+            if (foldCount == characterList.Count - 1)
             {
                 return true;
             }
@@ -613,7 +616,7 @@ namespace PlayingCards
         {
             foreach (var character in characterList)
             {
-                if (character.MyStatus == Status.GameOver)
+                if (character.MyStatus != Status.GameOver)
                 {
                     character.MyStatus = Status.Default;
                 }

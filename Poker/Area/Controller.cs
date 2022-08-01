@@ -467,7 +467,7 @@ namespace PlayingCards
         {
             int raiseChip = int.Parse(BetChipBox.Text);
 
-            if (PokerMain.callChip + raiseChip > MyPlayer.HoldChip)
+            if (PokerMain.callChip - MyPlayer.BetChip + raiseChip > MyPlayer.HoldChip)
             {
                 MessageBox.Show("チップが足りません");
             }
@@ -553,7 +553,7 @@ namespace PlayingCards
                 case Phase.AllFold:
                     SystemMessageLabel.Text = $"{PokerMain.roundCount}ラウンド目　" +
                                               $"{PokerMain.startCharacter.Name} から時計回り\n\n" +
-                                              $"{PokerMain.winner.Name} 以外の全員がフォールドしました" +
+                                              $"{PokerMain.winner.Name} 以外の全員がフォールドしました\n" +
                                               $"{PokerMain.winner.Name} の勝利です";
                     return;
                 case Phase.AllGameOver:

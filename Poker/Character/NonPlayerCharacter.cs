@@ -223,7 +223,7 @@ namespace PlayingCards
         {
             for (int i = 0; i < IsChangeHand.Length; i++)
             {
-                IsChangeHand[i] = false;
+                IsChangeHand[i] = true;
             }
         }
 
@@ -240,19 +240,19 @@ namespace PlayingCards
             {
                 if (IsChangeHand[i] == true)
                 {
-                    numList.Add(Hand[i].Number);
+                    numList.Add(Judge.numConversion(Hand[i].Number));
                 }
             }
 
             // 交換するカードの中で一番強い数字を取得する
-            int highNumber = Judge.numConversion(numList.Max());
+            int highNumber = numList.Max(x => x);
 
             // 一番強い数字がn以上なら、追加で残す
             if (highNumber > n)
             {
                 for (int i = 0; i < IsChangeHand.Length; i++)
                 {
-                    if (IsChangeHand[i] == true && Hand[i].Number == highNumber)
+                    if (IsChangeHand[i] == true && Judge.numConversion(Hand[i].Number) == highNumber)
                     {
                         IsChangeHand[i] = false;
                     }
@@ -262,43 +262,362 @@ namespace PlayingCards
         }
 
         /// <summary>
-        /// カード交換前、誰もベットしていない時の行動選択
+        /// 誰もベットしていない時の行動選択
         /// </summary>
         public override void ActionSelectBeforeBet()
         {
             Thread.Sleep(500);
 
-            int randomNum = random.Next(2);
-            if (randomNum == 0)
+            if (HoldChip <= 5)
             {
-                Bet(1);
+                Check();
+                return;
             }
-            else
+
+            // 手札の各数字と各スートをカウントする
+            int[] numCount = Judge.HandNumCount(Hand);
+            int[] suitCount = Judge.HandSuitCount(Hand);
+
+            // 役がスリーカード以上の場合
+            if (Judge.IsRoyalFlush(numCount, suitCount) || Judge.IsStraightFlush(numCount, suitCount) ||
+                Judge.IsFourOfKind(numCount) || Judge.IsFullHouse(numCount) || Judge.IsFlush(suitCount) ||
+                Judge.IsStraight(numCount) || Judge.IsThreeOfKind(numCount))
             {
-                Bet(1);
+                BeforeBetPattern1();
+                return;
             }
+
+            // 役がツーペア、ワンペアの場合
+            if (Judge.IsTwoPair(numCount) || Judge.IsPair(numCount))
+            {
+                BeforeBetPattern2();
+                return;
+            }
+
+            // 役なしの場合
+            BeforeBetPatter3();
         }
 
         /// <summary>
-        /// カード交換前、誰かがベットした後の行動選択
+        /// ベット前、スリーカード以上の場合
+        /// </summary>
+        void BeforeBetPattern1()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 3)
+            {
+                Bet(5);
+                return;
+            }
+            if (randomNum < 6)
+            {
+                Bet(4);
+                return;
+            }
+            if (randomNum < 8)
+            {
+                Bet(3);
+                return;
+            }
+            if (randomNum < 9)
+            {
+                Bet(2);
+                return;
+            }
+
+            Bet(1);
+        }
+
+        /// <summary>
+        /// ベット前、ツーペア、又はワンペアの場合
+        /// </summary>
+        void BeforeBetPattern2()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 1)
+            {
+                Bet(4);
+                return;
+            }
+            if (randomNum < 3)
+            {
+                Bet(3);
+                return;
+            }
+            if (randomNum < 7)
+            {
+                Bet(2);
+                return;
+            }
+            if (randomNum < 9)
+            {
+                Bet(1);
+                return;
+            }
+
+            Check();
+        }
+
+        /// <summary>
+        /// ベット前、役なしの場合
+        /// </summary>
+        void BeforeBetPatter3()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 1)
+            {
+                Bet(2);
+                return;
+            }
+            if (randomNum < 7)
+            {
+                Bet(1);
+                return;
+            }
+
+            Check();
+        }
+
+        /// <summary>
+        /// 誰かがベットした後の行動選択
         /// </summary>
         public override void ActionSelectAfterBet()
         {
             Thread.Sleep(500);
 
-            int randomNum = random.Next(3);
-            if (randomNum == 0)
+            if (HoldChip <= 5)
             {
                 Call();
+                return;
             }
-            else if (randomNum == 1)
+
+            // 手札の各数字と各スートをカウントする
+            int[] numCount = Judge.HandNumCount(Hand);
+            int[] suitCount = Judge.HandSuitCount(Hand);
+
+            // 役がスリーカード以上の場合
+            if (Judge.IsRoyalFlush(numCount, suitCount) || Judge.IsStraightFlush(numCount, suitCount) ||
+                Judge.IsFourOfKind(numCount) || Judge.IsFullHouse(numCount) || Judge.IsFlush(suitCount) ||
+                Judge.IsStraight(numCount) || Judge.IsThreeOfKind(numCount))
+            {
+                if (PokerMain.callChip > 15)
+                {
+                    Call();
+                    return;
+                }
+
+                AfterBetPattern1();
+                return;
+            }
+
+            // 役がツーペア、ワンペアの場合
+            if (Judge.IsTwoPair(numCount) || Judge.IsPair(numCount))
+            {
+                if (PokerMain.callChip > 15)
+                {
+                    AfterBetPattern2();
+                    return;
+                }
+                if (PokerMain.callChip > 10)
+                {
+                    AfterBetPattern3();
+                    return;
+                }
+
+                AfterBetPattern4();
+                return;
+            }
+
+            // 役なしの場合
+            if (PokerMain.callChip > 15)
+            {
+                AfterBetPattern5();
+                return;
+            }
+            if (PokerMain.callChip > 10)
+            {
+                AfterBetPattern6();
+                return;
+            }
+
+            AfterBetPattern7();
+        }
+
+        /// <summary>
+        /// ベット後、スリーカード以上、ベット総額が15枚以下
+        /// </summary>
+        void AfterBetPattern1()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 3)
+            {
+                Raise(5);
+                return;
+            }
+            if (randomNum < 6)
+            {
+                Raise(4);
+                return;
+            }
+            if (randomNum < 8)
+            {
+                Raise(3);
+                return;
+            }
+            if (randomNum < 9)
+            {
+                Raise(2);
+                return;
+            }
+
+            Raise(1);
+        }
+
+        /// <summary>
+        /// ベット後、ツーペアorワンペア、ベット総額が15枚より大きい
+        /// </summary>
+        void AfterBetPattern2()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 8)
+            {
+                Call();
+                return;
+            }
+
+            Fold();
+        }
+
+        /// <summary>
+        /// ベット後、ツーペアorワンペア、ベット総額が10枚より大きく15枚以下
+        /// </summary>
+        void AfterBetPattern3()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 2)
+            {
+                Raise(2);
+                return;
+            }
+
+            if (randomNum < 4)
             {
                 Raise(1);
+                return;
             }
-            else
+
+            Call();
+        }
+
+        /// <summary>
+        /// ベット後、ツーペアorワンペア、ベット総額が10枚以下
+        /// </summary>
+        void AfterBetPattern4()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 1)
+            {
+                Raise(5);
+                return;
+            }
+            if (randomNum < 2)
+            {
+                Raise(4);
+                return;
+            }
+            if (randomNum < 5)
+            {
+                Raise(3);
+                return;
+            }
+            if (randomNum < 7)
+            {
+                Raise(2);
+                return;
+            }
+            if (randomNum < 8)
+            {
+                Raise(1);
+                return;
+            }
+
+            Call();
+        }
+
+        /// <summary>
+        /// ベット後、役なし、ベット総額が15枚より大きい
+        /// </summary>
+        void AfterBetPattern5()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 2)
             {
                 Call();
+                return;
             }
+            
+
+            Fold();
+        }
+
+        /// <summary>
+        /// ベット後、役なし、ベット総額が10枚より大きく15枚以下
+        /// </summary>
+        void AfterBetPattern6()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 7)
+            {
+                Call();
+                return;
+            }
+
+            Fold();
+        }
+
+        /// <summary>
+        /// ベット後、役なし、ベット総額が10枚以下
+        /// </summary>
+        void AfterBetPattern7()
+        {
+            // 乱数
+            int randomNum = random.Next(10);
+
+            if (randomNum < 1)
+            {
+                Raise(3);
+                return;
+            }
+            if (randomNum < 2)
+            {
+                Raise(2);
+                return;
+            }
+            if (randomNum < 5)
+            {
+                Raise(1);
+                return;
+            }
+
+            Call();
         }
     }
 }
