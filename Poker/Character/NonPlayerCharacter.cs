@@ -240,7 +240,7 @@ namespace PlayingCards
             {
                 if (IsChangeHand[i] == true)
                 {
-                    numList.Add(Judge.numConversion(Hand[i].Number));
+                    numList.Add(Judge.NumConversion(Hand[i].Number));
                 }
             }
 
@@ -252,7 +252,7 @@ namespace PlayingCards
             {
                 for (int i = 0; i < IsChangeHand.Length; i++)
                 {
-                    if (IsChangeHand[i] == true && Judge.numConversion(Hand[i].Number) == highNumber)
+                    if (IsChangeHand[i] == true && Judge.NumConversion(Hand[i].Number) == highNumber)
                     {
                         IsChangeHand[i] = false;
                     }

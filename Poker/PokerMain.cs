@@ -29,7 +29,7 @@ namespace PlayingCards
         /// <summary>
         /// ゲーム開始時の所持チップ
         /// </summary>
-        public static int startChip = 10;
+        public static int startChip = 100;
         /// <summary>
         /// ベット、レイズ時の最低チップ額
         /// </summary>
@@ -167,6 +167,9 @@ namespace PlayingCards
         {
             // 順位を表示
             RankingDisplay();
+
+            // ステータスをデフォルトに戻す
+            GameEndStatusReset();
 
             // メッセージ表示後、次のゲームへ
             nowPhase = Phase.NextGame;
@@ -636,6 +639,17 @@ namespace PlayingCards
                 {
                     character.MyStatus = Status.Default;
                 }
+            }
+        }
+
+        /// <summary>
+        /// ゲーム終了時、キャラクターのステータスをデフォルトに戻す
+        /// </summary>
+        public static void GameEndStatusReset()
+        {
+            foreach (var character in characterList)
+            {
+                character.MyStatus = Status.Default;
             }
         }
 

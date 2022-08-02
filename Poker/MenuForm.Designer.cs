@@ -63,9 +63,9 @@
             this.label2.Font = new System.Drawing.Font("MS UI Gothic", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.label2.Location = new System.Drawing.Point(52, 121);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(167, 34);
+            this.label2.Size = new System.Drawing.Size(148, 34);
             this.label2.TabIndex = 2;
-            this.label2.Text = "ゲーム回数";
+            this.label2.Text = "ラウンド数";
             // 
             // gameCountBox
             // 
@@ -89,7 +89,7 @@
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.StartButtonClicked);
             // 
-            // PokerMenu
+            // MenuForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -99,7 +99,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.playerCountBox);
             this.Controls.Add(this.label1);
-            this.Name = "PokerMenu";
+            this.Name = "MenuForm";
             this.Text = "メニュー";
             this.ResumeLayout(false);
             this.PerformLayout();

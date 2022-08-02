@@ -41,7 +41,7 @@ namespace PlayingCards
             }
             if (string.IsNullOrWhiteSpace(gameCountBox.Text))
             {
-                MessageBox.Show("ゲーム回数を選択してください");
+                MessageBox.Show("ラウンド数数を選択してください");
                 return;
             }
 
